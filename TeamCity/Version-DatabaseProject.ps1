@@ -2,31 +2,31 @@
 
 # used to version SQL Server projects in TeamCity
 
-function Set-DatabaseProject-Version() {
+function Set-DatabaseProjectVersion() {
 	[CmdletBinding()]
 	param(
-	[parameter(Mandatory=$true)]
-	[ValidateScript({Test-Path $_})]
-	[ValidatePattern("\.sqlproj$")]
-	[string]$sqlProjLocation,
-	[parameter(Mandatory=$true)]
-	[string]$versionNumber)
+	    [parameter(Mandatory=$true)]
+	    [ValidateScript({Test-Path $_})]
+	    [ValidatePattern("\.sqlproj$")]
+	    [string]$sqlProjLocation,
+	    [parameter(Mandatory=$true)]
+	    [string]$versionNumber
+    )
 
-	return;
 
 	Write-Verbose "Read content from '$sqlProjLocation'"
 	[xml]$xml = Get-Content $sqlProjLocation
 
-	[string]$versionTagName = "DacVersion"
+	[string]$versionTagName = 'DacVersion'
 	$dacVersion = $xml.GetElementsByTagName($versionTagName)
 
 	if($dacVersion.Count -eq 0)
 	{
 		Write-Verbose "Adding 'DacVersion' property to .sqlproj, since it wasn't found!"
 
-		$ns = $xml.GetElementsByTagName("Project").Item(0).NamespaceURI
+		$ns = $xml.GetElementsByTagName('Project').Item(0).NamespaceURI
 
-		$proj = $xml.GetElementsByTagName("PropertyGroup") | ? { $_.GetElementsByTagName("ProjectGuid").Count -gt 0  } 
+		$proj = $xml.GetElementsByTagName('PropertyGroup') | Where-Object { $_.GetElementsByTagName('ProjectGuid').Count -gt 0  } 
 	
 		$proj.AppendChild($xml.CreateElement($versionTagName, $ns))
 
@@ -36,8 +36,8 @@ function Set-DatabaseProject-Version() {
 	Write-Verbose "Setting version to '$versionNumber'"
 	$dacVersion.Item(0).InnerText = $versionNumber
 
-	Write-Verbose "Saving .sqlproj file..."
+	Write-Verbose 'Saving .sqlproj file...'
 	$xml.Save($sqlProjLocation)
 }
 
-Set-DatabaseProject-Version
+Set-DatabaseProjectVersion

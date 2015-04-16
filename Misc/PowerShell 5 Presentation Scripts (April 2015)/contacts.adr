@@ -1,0 +1,67 @@
+Opera Hotlist version 2.0
+Options: encoding = utf8, version=3
+ 
+#CONTACT
+   ID=11
+   NAME=Justynka
+   CREATED=1195505237
+   MAIL=JUSTYNA66@gmail.com
+   ICON=Contact0
+ 
+#CONTACT
+   ID=12
+   NAME=Leszek
+   CREATED=1195677687
+   MAIL=Leszek@domena.pl
+   ICON=Contact0
+ 
+#CONTACT
+   ID=13
+   NAME=Iwona Kwiatkowska
+   CREATED=1196277590
+   MAIL=iwon.kwiat@op.pl
+   ICON=Contact0
+ 
+#CONTACT
+   ID=14
+   NAME=JUSTYNA66@gmail.com
+   CREATED=1347061687
+   MAIL=JUSTYNA66@gmail.com
+   ICON=Contact0
+ 
+#FOLDER
+   ID=15
+   NAME=Kosz
+   CREATED=1195505227
+   TRASH FOLDER=YES
+   UNIQUEID=EAF22324295C86499476802CC76DE41E
+ 
+-
+ 
+#CONTACT
+   ID=16
+   NAME=Ania
+   CREATED=1195505237
+   MAIL=Ania.Nowak@poczta.com
+   ICON=Contact0
+ 
+#CONTACT
+   ID=58
+   NAME=Bartek Bielawski
+   CREATED=1381258759
+   MAIL=bartek.bielawski@live.com
+   ICON=Contact0
+ 
+#CONTACT
+   ID=20
+   NAME=Poczta Grupowa
+   URL=
+   CREATED=1347221208
+   DESCRIPTION=
+   ACTIVE=YES
+   MAIL=xyz.abc.grupa.foo@gmail.com
+   PHONE=
+   FAX=
+   POSTALADDRESS=
+   PICTUREURL=
+   ICON=Contact0

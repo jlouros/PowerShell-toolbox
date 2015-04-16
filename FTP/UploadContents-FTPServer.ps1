@@ -6,7 +6,7 @@
 	authors:
 		https://github.com/jlouros
 	version:
-		0.1
+		0.2
 	missing features:
 		add capability to pass Username and Password (instead of NetworkCredentials)
 		Check if target FTP destination is a valid folder
@@ -26,7 +26,7 @@ Param(
 	[System.String]$ftpPassword
 )
 
-Function Check-If-Ftp-Directory-Exists {
+Function Check-IfFtpDirectoryExists {
 	[OutputType('System.Boolean')]
 	Param(
 		[parameter(Mandatory=$true)]
@@ -51,12 +51,12 @@ Function Check-If-Ftp-Directory-Exists {
 	Catch 
 	{
 		# process error
-		if($_.Exception.Message -match "File unavailable") {
+		if($_.Exception.Message -match 'File unavailable') {
 			# expected expection, proceed with return False
 			$ftpDirectoryExisits = $false
 		} else {
 			# unexpected error, cancel script execution
-			Write-Host "Unexcepected error found. Terminating script execution"
+			Write-Output 'Unexcepected error found. Terminating script execution'
 			Write-Error $_.Exception.Message -ErrorAction Stop
 		}
 	}
@@ -64,7 +64,7 @@ Function Check-If-Ftp-Directory-Exists {
 	return $ftpDirectoryExisits
 }
 
-Function Create-FTP-Directory-Recursively {
+Function Create-FTPDirectoryRecursively {
 	Param(
 		[parameter(Mandatory=$true)]
 		[ValidateNotNullOrEmpty()]
@@ -74,18 +74,18 @@ Function Create-FTP-Directory-Recursively {
 	)
 
     [System.String[]]$ftpSegments = $ftpTargetPath.Segments;
-    $ftpUrl = [string]::Format("{0}://{1}", $ftpTargetPath.Scheme, $ftpTargetPath.Host);
+    $ftpUrl = [string]::Format('{0}://{1}', $ftpTargetPath.Scheme, $ftpTargetPath.Host);
 
     # create necessary FTP folders
     for($i = 0; $i -lt $ftpSegments.Length; $i++) 
     {            
 	    $ftpUrl += $ftpSegments[$i];
 
-	    Write-Host "Checking is '$ftpUrl' exists"
+	    Write-Output "Checking is '$ftpUrl' exists"
 
-	    if((Check-If-Ftp-Directory-Exists $ftpUrl $ftpCredentials) -eq $false) 
+	    if((Check-IfFtpDirectoryExists $ftpUrl $ftpCredentials) -eq $false) 
 	    {
-		    Write-Host "Couldn't find specified location. Creating '$ftpUrl' folder" -ForegroundColor Gray
+		    Write-Output "Couldn't find specified location. Creating '$ftpUrl' folder" -ForegroundColor Gray
 
 		    [System.Net.FtpWebRequest]$mkdRequest = [System.Net.WebRequest]::Create($ftpUrl)
 	        $mkdRequest.Credentials = $ftpCredentials
@@ -97,7 +97,7 @@ Function Create-FTP-Directory-Recursively {
     }	
 }
 
-Function Transfer-Contents-To-FTP {
+Function Transfer-ContentsToFTP {
     Param(
 		[parameter(Mandatory=$true)]
 		[ValidateNotNullOrEmpty()]
@@ -114,7 +114,7 @@ Function Transfer-Contents-To-FTP {
     {            
 	    $fileDesitnation = New-Object System.Uri($ftpTargetPath, $srcFile.Name)
 
-	    Write-Host "Uploading file '$fileDesitnation'"
+	    Write-Output "Uploading file '$fileDesitnation'"
 
 	    # Upload file to FTP server
 	    [System.Net.FtpWebRequest]$ufRequest = [System.Net.WebRequest]::Create($fileDesitnation)
@@ -151,13 +151,13 @@ Function Transfer-DirectoryContents {
 
     foreach($currDir in $directories) 
     {
-        $newFtpDir = New-Object System.Uri($ftpTargetPath, "$($currDir.Name)/".Replace("//", "/"))
+        $newFtpDir = New-Object System.Uri($ftpTargetPath, "$($currDir.Name)/".Replace('//', '/'))
         $files = (Get-Item $currDir.FullName).GetFiles()
 
-        Create-FTP-Directory-Recursively $newFtpDir $ftpCredentials
+        Create-FTPDirectoryRecursively $newFtpDir $ftpCredentials
 
         if($files.Count -gt 0) {
-            Transfer-Contents-To-FTP $files $newFtpDir $ftpCredentials
+            Transfer-ContentsToFTP $files $newFtpDir $ftpCredentials
         }
 
         Transfer-DirectoryContents $currDir.FullName $newFtpDir $ftpCredentials
@@ -177,7 +177,7 @@ Function Process-UploadContents {
 	    [System.Net.NetworkCredential]$ftpCredentials
     )
 
-    if($ftpTargetPath.AbsolutePath.EndsWith("/") -eq $false) { Write-Error "Passed FTP target directory is not valid: '$ftpTargetPath'." -ErrorAction Stop }
+    if($ftpTargetPath.AbsolutePath.EndsWith('/') -eq $false) { Write-Error "Passed FTP target directory is not valid: '$ftpTargetPath'." -ErrorAction Stop }
 
     if((Test-Path $sourceDirectory) -eq $false) { Write-Error "Invalid or unexisting source directory: '$sourceDirectory'." -ErrorAction Stop }
 
@@ -186,9 +186,9 @@ Function Process-UploadContents {
 
     if(($sourceDirItems -eq $null)-or ($sourceDirItems.Count -lt 1)) { Write-Error "Source directory is empty: '$sourceDirectory'. Terminating script, since no files will be copied" -ErrorAction Stop }
 
-    Create-FTP-Directory-Recursively $ftpTargetPath $ftpCredentials
+    Create-FTPDirectoryRecursively $ftpTargetPath $ftpCredentials
 
-    Transfer-Contents-To-FTP $sourceDirItems $ftpTargetPath $ftpCredentials
+    Transfer-ContentsToFTP $sourceDirItems $ftpTargetPath $ftpCredentials
 
     Transfer-DirectoryContents $sourceDirectory $ftpTargetPath $ftpCredentials
 }
@@ -196,7 +196,11 @@ Function Process-UploadContents {
 
 # script execution
 
+
+#set ftp Url
 $ftpUrl = New-Object System.Uri($ftpAddressUrl)
+#set ftp Credentials
 $ftpCredentials = New-Object System.Net.NetworkCredential($ftpUsername,$ftpPassword)
 
+#upload all files from '$directory'
 Process-UploadContents $directory $ftpUrl $ftpCredentials

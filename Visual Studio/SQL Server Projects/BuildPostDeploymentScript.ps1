@@ -1,15 +1,15 @@
 # This script will be run as a pre-build event for database projects.
 # powershell -NoProfile -ExecutionPolicy RemoteSigned -file $(ProjectDir)Post Deployment Scripts\BuildPostDeploymentScript.ps1
 
-Write-Output "BEGIN generating post-deployment script references . . .";
+Write-Output 'BEGIN generating post-deployment script references . . .';
 Write-Output "`r`n";
 
-$dataFolderPath = "..\..\Post Deployment Scripts"; 
-$postDeploymentScriptFileName = "PostDeploymentScript.sql";
+$dataFolderPath = '..\..\Post Deployment Scripts'; 
+$postDeploymentScriptFileName = 'PostDeploymentScript.sql';
 $postDeploymentScriptPath = "..\..\Post Deployment Scripts\$postDeploymentScriptFileName";
 
 
-Write-Output "Looping through folder: " $dataFolderPath;
+Write-Output 'Looping through folder: ' $dataFolderPath;
 
 # Use 'here string' to write comment header to file.
 $postDeploymentScript_HeaderComments =@"
@@ -33,13 +33,13 @@ $postDeploymentScript_HeaderComments |  Out-File -filePath $postDeploymentScript
 $sqlScripts = @(Get-ChildItem $dataFolderPath -Recurse -Include *.sql -Exclude PostDeploymentScript.sql) | Sort-Object;
 
 # Output number of files found.
-Write-Output "Found " $sqlScripts.Count " files."
+Write-Output 'Found ' $sqlScripts.Count ' files.'
 
 # Add each data script file to the post-deployment script.
 foreach ($script in $sqlScripts)
 {
 	# Output file name.
-	Write-Output "Adding reference for: " $script "`r`n to " $postDeploymentScriptPath;
+	Write-Output 'Adding reference for: ' $script "`r`n to " $postDeploymentScriptPath;
 	
 	$sqlScriptPath = "PRINT N'Executing post deploymenty script: ";
 	$sqlScriptPath += $script.Name;
@@ -61,4 +61,4 @@ foreach ($script in $sqlScripts)
 
 # Done.
 Write-Output "`r`n";
-Write-Output "DONE generating sql script references for " $postDeploymentScriptPath "`r`n";
+Write-Output 'DONE generating sql script references for ' $postDeploymentScriptPath "`r`n";

@@ -1,53 +1,94 @@
 ﻿#use http://msdn.microsoft.com/en-us/library/windows/desktop/bb736357(v=vs.85).aspx for API reference
 
-Function Create-ScheduledTask($TaskName,$RunAsUser,$RunAsUserPassword,$TaskRun,$Schedule,$StartTime,$StartDate){
-	
-	$cmdStartDate = if([string]::IsNullOrWhiteSpace($StartDate)){""}else{"/sd $StartDate"}
-	$cmdStartTime = if([string]::IsNullOrWhiteSpace($StartTime)){""}else{"/st $StartTime"}
-	$cmdInterval = if([string]::IsNullOrWhiteSpace($Interval)){""}else{"/ri $Interval"}
-	$cmdDuration = if([string]::IsNullOrWhiteSpace($Duration)){""}else{"/du $Duration"}
-	$cmdRunAsUser = if((-not [string]::IsNullOrWhiteSpace($RunAsUser)) -and (-not [string]::IsNullOrWhiteSpace($RunAsUserPassword))){"/ru '$RunAsUser' /rp '$RunAsUserPassword'"} else {""}
+Function Create-ScheduledTask{
+     param (
+         [string]
+         $TaskName,
+         [string]
+         $RunAsUser,
+         [string]
+         $RunAsUserPassword,
+         [string]
+         $TaskRun,
+         [string]
+         $Schedule,
+         [string]
+         $StartTime,
+         [string]
+         $StartDate
+     )
 
-    if($RunAsUser -match "System") {
+	$cmdStartDate = if([string]::IsNullOrWhiteSpace($StartDate)){''}else{"/sd $StartDate"}
+	$cmdStartTime = if([string]::IsNullOrWhiteSpace($StartTime)){''}else{"/st $StartTime"}
+	$cmdInterval = if([string]::IsNullOrWhiteSpace($Interval)){''}else{"/ri $Interval"}
+	$cmdDuration = if([string]::IsNullOrWhiteSpace($Duration)){''}else{"/du $Duration"}
+	$cmdRunAsUser = if((-not [string]::IsNullOrWhiteSpace($RunAsUser)) -and (-not [string]::IsNullOrWhiteSpace($RunAsUserPassword))){"/ru '$RunAsUser' /rp '$RunAsUserPassword'"} else {''}
+
+    if($RunAsUser -match 'System') {
         $cmdRunAsUser = "/ru $RunAsUser"
     }
 
-    if($Schedule -match "MINUTE" -or $Schedule -match "HOURLY" -or $Schedule -match "ONSTART" -or $Schedule -match "ONLOGON" -or $Schedule -match "ONIDLE" -or $Schedule -match "ONEVENT") {
-        $cmdInterval = if([string]::IsNullOrWhiteSpace($Interval)){""}else{"/mo $Interval"}
+    if($Schedule -match 'MINUTE' -or $Schedule -match 'HOURLY' -or $Schedule -match 'ONSTART' -or $Schedule -match 'ONLOGON' -or $Schedule -match 'ONIDLE' -or $Schedule -match 'ONEVENT') {
+        $cmdInterval = if([string]::IsNullOrWhiteSpace($Interval)){''}else{"/mo $Interval"}
     }
 
 	$Command = "schtasks.exe /create $cmdRunAsUser /tn `"$TaskName`" /tr `"'$($TaskRun)'`" /sc $Schedule $cmdStartDate $cmdStartTime /F $cmdInterval $cmdDuration"
 
-	echo $Command          
+	Write-Output $Command          
 	Invoke-Expression $Command            
  }
 
-Function Delete-ScheduledTask($TaskName) {   
+Function Delete-ScheduledTask {
+     param (
+         [string]
+         $TaskName
+     )
+   
 	$Command = "schtasks.exe /delete /s localhost /tn `"$TaskName`" /F"            
 	Invoke-Expression $Command 
 }
 
-Function Stop-ScheduledTask($TaskName) {  
+Function Stop-ScheduledTask {
+     param (
+         [string]
+         $TaskName
+     )
+  
 	$Command = "schtasks.exe /end /s localhost /tn `"$TaskName`""            
 	Invoke-Expression $Command 
 }
 
-Function Start-ScheduledTask($TaskName) {   
+Function Start-ScheduledTask {
+     param (
+         [string]
+         $TaskName
+     )
+   
 	$Command = "schtasks.exe /run /s localhost /tn `"$TaskName`""            
 	Invoke-Expression $Command 
 }
 
-Function Enable-ScheduledTask($TaskName) {  
+Function Enable-ScheduledTask {
+     param (
+         [string]
+         $TaskName
+     )
+  
 	$Command = "schtasks.exe /change /s localhost /tn `"$TaskName`" /ENABLE"            
 	Invoke-Expression $Command 
 }
 
-Function ScheduledTask-Exists($taskName) {
+Function Check-IfScheduledTaskExists {
+     param (
+         [string]
+         $taskName
+     )
+
    $schedule = new-object -com Schedule.Service 
    $schedule.connect() 
-   $tasks = $schedule.getfolder("\").gettasks(0)
+   $tasks = $schedule.getfolder('\').gettasks(0)
 
-   foreach ($task in ($tasks | select Name)) {
+   foreach ($task in ($tasks | Select-Object Name)) {
 	  #echo "TASK: $($task.name)"
 	  if($task.Name -eq $taskName) {
 		 #write-output "$task already exists"
@@ -69,7 +110,7 @@ $startDate = $OctopusParameters['StartDate']
 $interval = $OctopusParameters['Interval']
 $duration = $OctopusParameters['Duration']
 
-if((ScheduledTask-Exists($taskName))){
+if((Check-IfScheduledTaskExists($taskName))){
 	Write-Output "$taskName already exists, Tearing down..."
 	Write-Output "Stopping $taskName..."
 	Stop-ScheduledTask($taskName)

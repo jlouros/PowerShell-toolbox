@@ -1,8 +1,11 @@
 ﻿#Requires -Version 4.0
 
-param([string]$xmlLocation, [System.Collections.Hashtable]$valuesTable)
+param(
+    [string]$xmlLocation, 
+    [System.Collections.Hashtable]$valuesTable
+)
 
-Function ChangeSetParameterValue
+Function Change-SetParameterValue
 {
     param ([xml]$xmlDoc, [string]$paramName, [string]$newValue)
 
@@ -19,23 +22,23 @@ Function ChangeSetParameterValue
 
 [xml]$xml = Get-Content $xmlLocation;
 
-if($xml -eq $null) { Write-Error "Unable to get XML document, please check directory path" -ErrorAction Stop }
+if($xml -eq $null) { Write-Error 'Unable to get XML document, please check directory path' -ErrorAction Stop }
 
-ChangeSetParameterValue $xml 'IIS Web Application Name' '%DeployIisAppPath%'
-ChangeSetParameterValue $xml 'Smtp Configuration' 'smtp.server.dev'
-ChangeSetParameterValue $xml 'Environment' 'Debug'
+Change-SetParameterValue $xml 'IIS Web Application Name' '%DeployIisAppPath%'
+Change-SetParameterValue $xml 'Smtp Configuration' 'smtp.server.dev'
+Change-SetParameterValue $xml 'Environment' 'Debug'
 
 foreach($tblKey in $valuesTable.Keys) 
 {
     $tblValue = $valuesTable[$tblKey]
     
-    ChangeSetParameterValue $xml $tblKey $tblValue
+    Change-SetParameterValue $xml $tblKey $tblValue
 }
 
 $emptyParams = $xml.SelectNodes("/parameters/setParameter[@value='']")
 if($emptyParams.Count -gt 0) 
 {
-    Write-Host "The following parameters were not modified: "
+    Write-Host 'The following parameters were not modified: '
 
     foreach($blank in $emptyParams) 
     {

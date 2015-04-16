@@ -81,19 +81,19 @@ function Add-CustomHttpResponseHeader()
 {
     Param
 	(
-		[Alias("WEBSITE", "WEB", "W")]
+		[Alias('WEBSITE', 'WEB', 'W')]
 		[string] $WebSiteName,
 
 		[Parameter(Mandatory=$True)]
 		[ValidateNotNullOrEmpty()]
-		[Alias("HEADER", "H")]
+		[Alias('HEADER', 'H')]
 	    [string] $HttpHeader,
 
-		[Alias("VALUE", "V")]
+		[Alias('VALUE', 'V')]
 		[string] $HttpHeaderValue
 	)
 
-    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Web.Administration") | Out-Null
+    [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.Web.Administration') | Out-Null
 	$serverManager = New-Object Microsoft.Web.Administration.ServerManager
 
     if ([string]::IsNullOrWhiteSpace($WebSiteName))
@@ -105,12 +105,12 @@ function Add-CustomHttpResponseHeader()
 		$config= $serverManager.GetWebConfiguration($WebSiteName)
 	}
 
-	$httpProtocolSection = $config.GetSection("system.webServer/httpProtocol")
-	$customHeadersCollection = $httpProtocolSection.GetCollection("customHeaders")
+	$httpProtocolSection = $config.GetSection('system.webServer/httpProtocol')
+	$customHeadersCollection = $httpProtocolSection.GetCollection('customHeaders')
 
-	$newHeader = $customHeadersCollection.CreateElement("add")
-	$newHeader["name"] = $HttpHeader
-	$newHeader["value"] = ?: { [string]::IsNullOrEmpty($HttpHeaderValue) } { [string]::Empty } { $HttpHeaderValue }
+	$newHeader = $customHeadersCollection.CreateElement('add')
+	$newHeader['name'] = $HttpHeader
+	$newHeader['value'] = ?: { [string]::IsNullOrEmpty($HttpHeaderValue) } { [string]::Empty } { $HttpHeaderValue }
 
     $customHeadersCollection.Add($newHeader)
 
@@ -208,14 +208,14 @@ function Add-CustomHttpResponseHeader()
 #>
 function New-IISAppPool()
 {
-    [CmdletBinding(DefaultParameterSetName="Username")]
+    [CmdletBinding(DefaultParameterSetName='Username')]
     Param
     (
         [Parameter(Mandatory=$true, Position = 0, ValueFromPipeline=$true)]
         [ValidateScript({
             if (Test-Path "IIS:\AppPools\$_")
             {
-                Throw New-Object -TypeName System.ArgumentException -ArgumentList "The IIS Application Pool '$_' already exists.", "Name"
+                Throw New-Object -TypeName System.ArgumentException -ArgumentList "The IIS Application Pool '$_' already exists.", 'Name'
             }
             else
             {
@@ -225,29 +225,29 @@ function New-IISAppPool()
         [string] $Name,
 
         [Parameter(Position=1)]
-        [Alias("MRV", "V", "Runtime")]
-        [ValidateSet("v2.0", "v4.0")]
-        [string] $ManagedRuntimeVersion = "v2.0",
+        [Alias('MRV', 'V', 'Runtime')]
+        [ValidateSet('v2.0', 'v4.0')]
+        [string] $ManagedRuntimeVersion = 'v2.0',
 
         [Parameter(Position=2)]
-        [Alias("Pipeline")]
-        [ValidateSet("Integrated", "Classic")]
-        [string] $PipelineMode = "Integrated",
+        [Alias('Pipeline')]
+        [ValidateSet('Integrated', 'Classic')]
+        [string] $PipelineMode = 'Integrated',
 
         [Parameter(Position=3)]
-        [Alias("CPU")]
-        [ValidateSet("x86", "x64")]
-        [string] $CpuMode = "x64",
+        [Alias('CPU')]
+        [ValidateSet('x86', 'x64')]
+        [string] $CpuMode = 'x64',
 
-        [Parameter(Position=4, ParameterSetName="Username")]
-        [Parameter(Position=4, ParameterSetName="Credential")]
-        [ValidateSet("LocalSystem", "LocalService", "NetworkService", "SpecificUser", "ApplicationPoolIdentity")]
-        [string] $IdentityType = "ApplicationPoolIdentity",
+        [Parameter(Position=4, ParameterSetName='Username')]
+        [Parameter(Position=4, ParameterSetName='Credential')]
+        [ValidateSet('LocalSystem', 'LocalService', 'NetworkService', 'SpecificUser', 'ApplicationPoolIdentity')]
+        [string] $IdentityType = 'ApplicationPoolIdentity',
 
-        [Parameter(ParameterSetName="Username")]
+        [Parameter(ParameterSetName='Username')]
         [string] $Username = [string]::Empty,
 
-        [Parameter(ParameterSetName="Credential")]
+        [Parameter(ParameterSetName='Credential')]
         [System.Management.Automation.PSCredential]$Credential,
 
         [switch] $Interactive
@@ -255,9 +255,9 @@ function New-IISAppPool()
 
     [System.Management.Automation.PSCredential] $AppPoolCredential
 
-    if ($IdentityType.ToLowerInvariant() -eq "SpecificUser".ToLowerInvariant())
+    if ($IdentityType.ToLowerInvariant() -eq 'SpecificUser'.ToLowerInvariant())
     {
-        if ($PSCmdlet.ParameterSetName -imatch "Credential")
+        if ($PSCmdlet.ParameterSetName -imatch 'Credential')
         {
             $AppPoolCredential = $Credential
         }
@@ -267,17 +267,17 @@ function New-IISAppPool()
             {
                 if ($Interactive)
                 {
-                    $AppPoolCredential = $Host.UI.PromptForCredential("Application Pool Identity Credentials", "Please specify the username and password to be used for the Application Pool Identity.", $Username, "", [System.Management.Automation.PSCredentialTypes]::Domain, [System.Management.Automation.PSCredentialUIOptions]::ValidateUserNameSyntax)
+                    $AppPoolCredential = $Host.UI.PromptForCredential('Application Pool Identity Credentials', 'Please specify the username and password to be used for the Application Pool Identity.', $Username, '', [System.Management.Automation.PSCredentialTypes]::Domain, [System.Management.Automation.PSCredentialUIOptions]::ValidateUserNameSyntax)
                 }
                 else
                 {
-                    $AppPoolCredential = New-Object System.Management.Automation.PSCredential $(Read-Host -Prompt "Application Pool Identity Username"), $(Read-Host -Prompt "Application Pool Identity Password" -AsSecureString)   
+                    $AppPoolCredential = New-Object System.Management.Automation.PSCredential $(Read-Host -Prompt 'Application Pool Identity Username'), $(Read-Host -Prompt 'Application Pool Identity Password' -AsSecureString)   
                 }
             }
 
             if ($Interactive)
             {
-                $AppPoolCredential = $Host.UI.PromptForCredential("Application Pool Identity Password", "Please enter the password for the specified user to be used for the Application Pool Identity.", $Username, "", [System.Management.Automation.PSCredentialTypes]::Domain, [System.Management.Automation.PSCredentialUIOptions]::ValidateUserNameSyntax)
+                $AppPoolCredential = $Host.UI.PromptForCredential('Application Pool Identity Password', 'Please enter the password for the specified user to be used for the Application Pool Identity.', $Username, '', [System.Management.Automation.PSCredentialTypes]::Domain, [System.Management.Automation.PSCredentialUIOptions]::ValidateUserNameSyntax)
             }
             else
             {
@@ -286,40 +286,40 @@ function New-IISAppPool()
         }
     }
 
-    Write-Verbose "The following IIS Application Pool will be created:"
+    Write-Verbose 'The following IIS Application Pool will be created:'
     Write-Verbose "    Application Pool Name:                    $Name"
     Write-Verbose "    Application Pool Managed Runtime Version: $ManagedRuntimeVersion"
     Write-Verbose "    Application Pool CPU Mode:                $CpuMode"
     Write-Verbose "    Application Pool Pipeline Mode:           $PipelineMode"
     Write-Verbose "    Application Pool Identity Type:           $IdentityType"
-    if ($IdentityType -imatch "SpecificUser")
+    if ($IdentityType -imatch 'SpecificUser')
     {
         Write-Verbose "    Application Pool Identity Username:       $Username"
     }
 
     New-WebAppPool $Name
 
-    if ($ManagedRuntimeVersion -eq "v4.0")
+    if ($ManagedRuntimeVersion -eq 'v4.0')
     {
         Set-ItemProperty "IIS:\AppPools\$Name" managedRuntimeVersion $ManagedRuntimeVersion
     }
 
-    if ($PipelineMode -imatch "Classic")
+    if ($PipelineMode -imatch 'Classic')
     {
         Set-ItemProperty "IIS:\AppPools\$Name" managedPipelineMode 1
     }
 
-    if ($CpuMode -imatch "x86")
+    if ($CpuMode -imatch 'x86')
     {
         Set-ItemProperty "IIS:\AppPools\$Name" enable32BitAppOnWin64 $true
     }
 
     switch ($IdentityType.ToLowerInvariant())
     {
-        "localsystem"    { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 0 }
-        "localservice"   { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 1 }
-        "networkservice" { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 2 }
-        "specificuser"
+        'localsystem'    { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 0 }
+        'localservice'   { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 1 }
+        'networkservice' { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 2 }
+        'specificuser'
         {
             Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 3
             Set-ItemProperty "IIS:\AppPools\$Name" processModel.userName $AppPoolCredential.UserName
@@ -384,7 +384,7 @@ function New-IISAppPool()
 #>
 function New-IISVirtualDirectory()
 {
-    [CmdletBinding(DefaultParameterSetName="Username")]
+    [CmdletBinding(DefaultParameterSetName='Username')]
     Param
     (
         [Parameter(Mandatory=$True, Position = 0, ValueFromPipelineByPropertyName=$True)]
@@ -392,23 +392,23 @@ function New-IISVirtualDirectory()
         [string] $Name,
 
         [Parameter(ValueFromPipelineByPropertyName=$True)]
-        [Alias("Path", "P")]
+        [Alias('Path', 'P')]
         [string] $PhysicalPath,
 
         [Parameter(Mandatory=$True, Position = 1, ValueFromPipelineByPropertyName=$True)]
         [ValidateNotNullOrEmpty()]
-        [Alias("S")]
+        [Alias('S')]
         [string] $Site,
 
-        [Parameter(ParameterSetName="Username")]
-        [Alias("User", "U")]
+        [Parameter(ParameterSetName='Username')]
+        [Alias('User', 'U')]
         [string] $Username = [string]::Empty,
 
-        [Parameter(ParameterSetName="Credential")]
+        [Parameter(ParameterSetName='Credential')]
         [System.Management.Automation.PSCredential] $Credential,
 
         [Parameter(ValueFromPipelineByPropertyName=$TRue)]
-        [Alias("App", "A")]
+        [Alias('App', 'A')]
         [string] $Application = [string]::Empty,
 
         [switch] $Force
@@ -543,39 +543,39 @@ function New-IISVirtualDirectory()
 #>
 function New-IISWebsiteAndAppPool()
 {
-    [CmdletBinding(DefaultParameterSetName="SpecialAppPoolIdentity")]
+    [CmdletBinding(DefaultParameterSetName='SpecialAppPoolIdentity')]
     Param
     (
         [Parameter(Mandatory=$true, Position=0, ValueFromPipelineByPropertyName=$True)]
         [ValidateNotNullOrEmpty()]
-        [Alias("Path")]
+        [Alias('Path')]
         [string] $PhysicalPath,
 
         [Parameter(Mandatory=$True, Position=1, ValueFromPipelineByPropertyName=$True)]
-        [Alias("SiteName", "S", "Web", "W")]
+        [Alias('SiteName', 'S', 'Web', 'W')]
         [string] $WebSiteName,
 
         [Parameter(Position=2, ValueFromPipelineByPropertyName=$True)]
-        [Alias("AppPool", "App", "A")]
+        [Alias('AppPool', 'App', 'A')]
         [string] $AppPoolName,
 
-        [Parameter(ParameterSetName="UserAppPoolIdentity")]
-        [Alias("User", "U")]
+        [Parameter(ParameterSetName='UserAppPoolIdentity')]
+        [Alias('User', 'U')]
         [string] $AppPoolUser,
 
-        [Parameter(ParameterSetName="CredentialAppPoolIdentity")]
-        [Alias("Cred")]
+        [Parameter(ParameterSetName='CredentialAppPoolIdentity')]
+        [Alias('Cred')]
         [System.Management.Automation.PSCredential]$Credential,
 
-        [Alias("H")]
+        [Alias('H')]
         [string] $HostHeader,
 
-        [Alias("IP")]
+        [Alias('IP')]
         [string] $IPAddress,
 
         [switch] $UseCustomPort,
 
-        [Alias("P")]
+        [Alias('P')]
         [ValidateScript({ 
             if ($_ -and $_ -gt 65535)
             {
@@ -590,21 +590,21 @@ function New-IISWebsiteAndAppPool()
 
         [Switch] $Ssl,
 
-        [Alias("Pipeline")]
-        [ValidateSet("Classic", "Integrated")]
-        [string] $PipelineMode = "Classic",
+        [Alias('Pipeline')]
+        [ValidateSet('Classic', 'Integrated')]
+        [string] $PipelineMode = 'Classic',
 
-        [Alias("V", "MRV", "Runtime")]
-        [ValidateSet("v2.0", "v4.0")]
-        [string] $ManagedRuntimeVersion = "v2.0",
+        [Alias('V', 'MRV', 'Runtime')]
+        [ValidateSet('v2.0', 'v4.0')]
+        [string] $ManagedRuntimeVersion = 'v2.0',
 
-        [Alias("CPU")]
-        [ValidateSet("x86", "x64")]
-        [string] $CpuMode = "x64",
+        [Alias('CPU')]
+        [ValidateSet('x86', 'x64')]
+        [string] $CpuMode = 'x64',
 
-        [Parameter(ParameterSetName="SpecialAppPoolIdentity")]
-        [ValidateSet("LocalSystem", "LocalService", "NetworkService", "ApplicationPoolIdentity")]
-        [string] $IdentityType = "ApplicationPoolIdentity",
+        [Parameter(ParameterSetName='SpecialAppPoolIdentity')]
+        [ValidateSet('LocalSystem', 'LocalService', 'NetworkService', 'ApplicationPoolIdentity')]
+        [string] $IdentityType = 'ApplicationPoolIdentity',
 
         [switch] $Interactive
     )
@@ -613,7 +613,7 @@ function New-IISWebsiteAndAppPool()
     {
         if (-not [System.IO.Path]::IsPathRooted($PhysicalPath))
         {
-            $wwwroot = [System.IO.Path]::Combine([System.IO.Path]::GetPathRoot($env:SystemRoot), "inetpub", "wwwroot")
+            $wwwroot = [System.IO.Path]::Combine([System.IO.Path]::GetPathRoot($env:SystemRoot), 'inetpub', 'wwwroot')
             Write-Verbose "The path '$PhysicalPath' is a relative path. Assuming it should be located relative to '$wwwroot'."
             $PhysicalPath = [System.IO.Path]::Combine($wwwroot, $PhysicalPath)
         }
@@ -627,76 +627,76 @@ function New-IISWebsiteAndAppPool()
         }
 
         $newAppPoolParams = @{
-            "Name" = $AppPoolName;
-            "PipelineMode" = $PipelineMode;
-            "ManagedRuntimeVersion" = $ManagedRuntimeVersion;
-            "CpuMode" = $CpuMode;
-            "Interactive" = $Interactive;
+            'Name' = $AppPoolName;
+            'PipelineMode' = $PipelineMode;
+            'ManagedRuntimeVersion' = $ManagedRuntimeVersion;
+            'CpuMode' = $CpuMode;
+            'Interactive' = $Interactive;
         }
          
-        if ($PSCmdlet.ParameterSetName -imatch "CredentialAppPoolIdentity")
+        if ($PSCmdlet.ParameterSetName -imatch 'CredentialAppPoolIdentity')
         {
-            $newAppPoolParams.Add("IdentityType", "SpecificUser")
-            $newAppPoolParams.Add("Credential", $Credential)
+            $newAppPoolParams.Add('IdentityType', 'SpecificUser')
+            $newAppPoolParams.Add('Credential', $Credential)
         }
-        elseif ($PSCmdlet.ParameterSetName -imatch "UserAppPoolIdentity")
+        elseif ($PSCmdlet.ParameterSetName -imatch 'UserAppPoolIdentity')
         {
-            $newAppPoolParams.Add("IdentityType", "SpecificUser")
+            $newAppPoolParams.Add('IdentityType', 'SpecificUser')
 
             if (-not [string]::IsNullOrWhiteSpace($AppPoolUser))
             {
                 
-                $newAppPoolParams.Add("Username", $AppPoolUser)
+                $newAppPoolParams.Add('Username', $AppPoolUser)
             }
         }
         else
         {
-            $newAppPoolParams.Add("IdentityType", $IdentityType)
+            $newAppPoolParams.Add('IdentityType', $IdentityType)
         }
 
         New-IISAppPool @newAppPoolParams
 
         # Create the new website
         $newWebsiteParams = @{
-            "Name" = $WebSiteName;
-            "ApplicationPool" = $AppPoolName;
-            "PhysicalPath" = $PhysicalPath;
-            "Ssl" = $Ssl 
+            'Name' = $WebSiteName;
+            'ApplicationPool' = $AppPoolName;
+            'PhysicalPath' = $PhysicalPath;
+            'Ssl' = $Ssl 
         }
         
         if ($UseCustomPort)
         {
-            Write-Verbose "The parameter -UseCustomPort was set."
+            Write-Verbose 'The parameter -UseCustomPort was set.'
 
             if ($Port)
             {
                 Write-Verbose "Using custom port $Port."
-                $newWebsiteParams.Add("Port", $Port)
+                $newWebsiteParams.Add('Port', $Port)
             }
             else
             {
-                Write-Verbose "Even though -UseCustomPort was set, no port was provided."
+                Write-Verbose 'Even though -UseCustomPort was set, no port was provided.'
                 if ($Ssl)
                 {
-                    Write-Verbose "SSL was specified, so using port 443."
-                    $newWebsiteParams.Add("Port", 443)
+                    Write-Verbose 'SSL was specified, so using port 443.'
+                    $newWebsiteParams.Add('Port', 443)
                 }
                 else
                 {
-                    Write-Verbose "Using port 80."
-                    $newWebsiteParams.Add("Port", 80)
+                    Write-Verbose 'Using port 80.'
+                    $newWebsiteParams.Add('Port', 80)
                 }
             }
         }
 
         if (-not [string]::IsNullOrWhiteSpace($HostHeader))
         {
-            $newWebsiteParams.Add("HostHeader", $HostHeader)
+            $newWebsiteParams.Add('HostHeader', $HostHeader)
         }
 
         if (-not [string]::IsNullOrWhiteSpace($IPAddress))
         {
-            $newWebsiteParams.Add("IPAddress", $IPAddress)
+            $newWebsiteParams.Add('IPAddress', $IPAddress)
         }        
 
         New-Website @newWebSiteParams

@@ -1,23 +1,23 @@
 ﻿[CmdletBinding()]
 param(
 	[ValidateNotNullOrEmpty()]
-	[string]$serverInstance = "localhost"
+	[string]$serverInstance = 'localhost'
 )
 
-Function Resolve-Invoke-Sqlcmd() {
-	if (-not (Get-Command "Invoke-SqlCmd" -ErrorAction SilentlyContinue))
+Function Resolve-InvokeSqlcmd() {
+	if (-not (Get-Command 'Invoke-SqlCmd' -ErrorAction SilentlyContinue))
 	{
-		Write-Verbose "Invoke-SqlCmd not found as a known command. Adding required PSSnapin"
+		Write-Verbose 'Invoke-SqlCmd not found as a known command. Adding required PSSnapin'
 		Add-PSSnapin SqlServerCmdletSnapin100 
 		Add-PSSnapin SqlServerCmdletSnapin100 
 	}
 
-	if (-not (Get-Command "Invoke-SqlCmd" -ErrorAction SilentlyContinue)) {
+	if (-not (Get-Command 'Invoke-SqlCmd' -ErrorAction SilentlyContinue)) {
 		Write-Error "Unable to resolve 'Invoke-SqlCmd' PowerShell command. This process can't continue without it!" -ErrorAction Stop
 	}
 }
 
-Function Get-SQLServerDataTools-Location {
+Function Get-SQLServerDataToolsLocation {
 	<#
 	.SYNOPSIS
 		Gets path for SQL Server Data tools
@@ -28,21 +28,21 @@ Function Get-SQLServerDataTools-Location {
 
 
 	# Visual Studio 2012 SQL Package location
-	$SqlPackageLocation = "C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\120\sqlpackage.exe"
+	$SqlPackageLocation = 'C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\120\sqlpackage.exe'
 
 	if((Test-Path $SqlPackageLocation) -eq $false) {
 		# Visual Studio 2013 SQL Package location
-		$SqlPackageLocation = "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\120\sqlpackage.exe"
+		$SqlPackageLocation = 'C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\120\sqlpackage.exe'
 	}
 
 	if((Test-Path $SqlPackageLocation) -eq $false) {
 		# SQL Server 2014 SQL Package location
-		$SqlPackageLocation = "C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\sqlpackage.exe"
+		$SqlPackageLocation = 'C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\sqlpackage.exe'
 	}
 
 	if((Test-Path $SqlPackageLocation) -eq $false) {
 		# SQL Server 2012 SQL Package location
-		$SqlPackageLocation = "C:\Program Files (x86)\Microsoft SQL Server\110\DAC\bin\sqlpackage.exe"
+		$SqlPackageLocation = 'C:\Program Files (x86)\Microsoft SQL Server\110\DAC\bin\sqlpackage.exe'
 	}
 
 	# Last verification point
@@ -54,26 +54,26 @@ Function Get-SQLServerDataTools-Location {
 	return $SqlPackageLocation
 }
 
-$verbosityFlag = ($PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent -eq $true)
+$verbosityFlag = ($PSCmdlet.MyInvocation.BoundParameters['Verbose'].IsPresent -eq $true)
 
-Resolve-Invoke-Sqlcmd
+Resolve-InvokeSqlcmd
 
-$SqlPackageLocation = Get-SQLServerDataTools-Location
+$SqlPackageLocation = Get-SQLServerDataToolsLocation
 
 $publishProfiles = Get-ChildItem . -Recurse -Include *.publish.xml
 
 
 
 Write-Verbose "Running 'DeleteMockedDatabases.sql' on '$serverInstance'..." 
-Invoke-Sqlcmd -InputFile $(Join-Path ($(Get-Item .).FullName) "DeleteMockedDatabases.sql") -ServerInstance $serverInstance -Verbose:$verbosityFlag
+Invoke-Sqlcmd -InputFile $(Join-Path ($(Get-Item .).FullName) 'DeleteMockedDatabases.sql') -ServerInstance $serverInstance -Verbose:$verbosityFlag
 
 
 
 Write-Verbose "Running 'CreateDatabases.sql' on '$serverInstance'..." 
-Invoke-Sqlcmd -InputFile $(Join-Path ($(Get-Item .).FullName) "CreateDatabases.sql") -ServerInstance $serverInstance -Verbose:$verbosityFlag
+Invoke-Sqlcmd -InputFile $(Join-Path ($(Get-Item .).FullName) 'CreateDatabases.sql') -ServerInstance $serverInstance -Verbose:$verbosityFlag
 
 Write-Verbose "Running 'CreateLinkedServers.sql' on '$serverInstance'..."
-Invoke-Sqlcmd -InputFile $(Join-Path ($(Get-Item .).FullName) "CreateLinkedServers.sql") -ServerInstance $serverInstance -Verbose:$verbosityFlag
+Invoke-Sqlcmd -InputFile $(Join-Path ($(Get-Item .).FullName) 'CreateLinkedServers.sql') -ServerInstance $serverInstance -Verbose:$verbosityFlag
 
 
 foreach($publishProf in $publishProfiles) 
@@ -86,7 +86,7 @@ foreach($publishProf in $publishProfiles)
 	}
 
 	& $SqlPackageLocation /pr:"$($publishProf.FullName)" /sf:"$($dacpac.FullName)" /a:Publish 
-	Write-Output "-----------------------------------------------------------------------------"
+	Write-Output '-----------------------------------------------------------------------------'
 }
 
-cd $PSScriptRoot
+Set-Location $PSScriptRoot

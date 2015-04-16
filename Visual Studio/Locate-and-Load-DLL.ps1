@@ -1,8 +1,8 @@
-﻿Function LoadStashApiDll 
+﻿Function Load-StashApiDll 
 {
-    $dllName = "Atlassian.Stash.Api.dll"
+    $dllName = 'Atlassian.Stash.Api.dll'
 
-    $dlls = Get-ChildItem .\Atlassian.Stash.Api\bin\ -Recurse | ? { $_.Name -match $dllName }
+    $dlls = Get-ChildItem .\Atlassian.Stash.Api\bin\ -Recurse | Where-Object { $_.Name -match $dllName }
 
     if($dlls.Length -eq 0) 
     {
@@ -19,5 +19,5 @@
     Write-Output "'$dllName' successfully loaded."
 }
 
-LoadStashApiDll 
+Load-StashApiDll 
 #$stashClient = New-Object Atlassian.Stash.Api.StashClient("http://ptr-cvsd/", "asdassa")

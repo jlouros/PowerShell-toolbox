@@ -12,7 +12,7 @@ function Change-WebConfig-ConnectionStringKeys() {
 	Write-Verbose "Read content from '$xmlFileLocation'"
 	[xml]$xml = Get-Content $xmlFileLocation
 
-    $connStringsElem = $xml.GetElementsByTagName("connectionStrings");
+    $connStringsElem = $xml.GetElementsByTagName('connectionStrings');
 
     foreach($conn in $connStringsElem.Item(0).add) {
         $octoVar =  "#{$($conn.name)}"
@@ -24,4 +24,4 @@ function Change-WebConfig-ConnectionStringKeys() {
 	$xml.Save($xmlFileLocation)
 }
 
-Change-WebConfig-ConnectionStringKeys "C:\temp\web.config" -Verbose
+Change-WebConfig-ConnectionStringKeys 'C:\temp\web.config' -Verbose
