@@ -2,13 +2,13 @@
 
 
 #register my OneGet Server
-Register-PackageSource -Name cayanRepository -Location 'http://john-pc:8000/nuget' -Provider chocolatey -Trusted -Verbose
+Register-PackageSource -Name myChocolateyRepository -Location 'http://john-pc:8000/nuget' -Provider chocolatey -Trusted -Verbose
 
 #list all packages from this source
-Find-Package -Source cayanRepository
+Find-Package -Source myChocolateyRepository
 
 #find package with UI and install the selected one
-Find-Package -Source cayanRepository -AllVersions | Out-Gridview -PassThru | Install-Package
+Find-Package -Source myChocolateyRepository -AllVersions | Out-Gridview -PassThru | Install-Package
 
 #unregister 
-Unregister-PackageSource -Name cayanRepository
+Unregister-PackageSource -Name myChocolateyRepository

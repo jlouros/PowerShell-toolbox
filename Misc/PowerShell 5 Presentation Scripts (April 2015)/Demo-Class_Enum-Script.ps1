@@ -77,15 +77,15 @@ Class WebsiteMonitor
 
 
 # create a new instance of 'WebsiteMonitor'
-$monitor = [WebsiteMonitor]::New('FT02-TPM270-2',[PrtgMode]::Off)
+$monitor = [WebsiteMonitor]::New('VirtualMachine-Name',[PrtgMode]::Off)
 
 
 $sitesToVerify = @(
-    ('ps1.merchantware.net', '/MagensaDemo/MagensaWS/ServiceRelay.asmx'),
-    ('gwadmin.merchantware.net', '/signin.aspx'),
-    ('genius.merchantware.net', '/v1/Login.aspx'),
-    ('manage.merchantware.net', '/MobileAccess/CredentialService.asmx'),
-    ('transport.merchantware.net', '/v4/TransportService.asmx')
+    ('ps1.localhost', '/MagensaDemo/ServiceRelay.asmx'),
+    ('gwadmin.localhost', '/signin.aspx'),
+    ('genius.localhost', '/v1/Login.aspx'),
+    ('manage.localhost', '/MobileAccess/CredentialService.asmx'),
+    ('transport.localhost', '/v4/TransportService.asmx')
 )
 
 # call 'AssertWebsiteIsAvailable' method for each entrie in '$sitesToVerify' array
