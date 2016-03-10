@@ -1,0 +1,1 @@
+﻿& schtasks.exe /create /TN "Kill Process Task" /XML ".\ScheduleTask-To-Kill-Process.xml"
