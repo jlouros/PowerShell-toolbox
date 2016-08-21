@@ -10,20 +10,20 @@
 #Requires -RunAsAdministrator 
 
 
-Get-ChildItem 'C:\inetpub\' -Filter 'web.config' -Recurse | ForEach-Object {
+Get-ChildItem -Path "$env:HOMEDRIVE\inetpub\" -Filter 'web.config' -Recurse | ForEach-Object {
 
     $directory = $_.Directory.FullName
     $filePath = $_.FullName
-    $webConfig = [xml](Get-Content $filePath)
+    $webConfig = [xml](Get-Content -Path $filePath)
 
     if($webConfig.SelectSingleNode('//connectionStrings').HasChildNodes) {
-        Write-Output "`r`nencrypting '$filePath' connection strings..."
+        Write-Output -InputObject "`r`nencrypting '$filePath' connection strings..."
 
         & $env:windir\Microsoft.NET\Framework64\v4.0.30319\aspnet_regiis.exe -pef 'connectionStrings' $directory -prov 'DataProtectionConfigurationProvider'
     }
 
     if(-not ([string]::IsNullOrWhiteSpace($webConfig.SelectSingleNode('//system.web/sessionState[@sqlConnectionString]')))) {
-        Write-Output "`r`nencrypting '$filePath' session state..."
+        Write-Output -InputObject "`r`nencrypting '$filePath' session state..."
 
         & $env:windir\Microsoft.NET\Framework64\v4.0.30319\aspnet_regiis.exe -pef 'system.web/sessionState' $directory -prov 'DataProtectionConfigurationProvider'
     }

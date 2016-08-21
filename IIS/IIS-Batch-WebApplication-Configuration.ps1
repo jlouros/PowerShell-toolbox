@@ -16,16 +16,16 @@ $settings = @{
         'CpuMode' = 'x86'
         'WebSiteName' = 'WebSite1'
         'WebBinding' = 'WebSite1.localhost'
-        'PhysicalPath' = 'C:\_CompanyName\Websites\WebSite1'
+        'PhysicalPath' = "$env:HOMEDRIVE\_CompanyName\Websites\WebSite1"
         'VirtualApplications' = @(
                 @{
                 'Name' = 'ContainerTagTest'
-                'PhysicalPath' = 'C:\_CompanyName\Websites\ContainerTagTest'
+                'PhysicalPath' = "$env:HOMEDRIVE\_CompanyName\Websites\ContainerTagTest"
                 'AppPoolName' = 'WebSite1'
                 },
                 @{
                 'Name' = 'CompanyName'
-                'PhysicalPath' = 'C:\_CompanyName\Websites\CompanyName'
+                'PhysicalPath' = "$env:HOMEDRIVE\_CompanyName\Websites\CompanyName"
                 'AppPoolName' = 'WebSite1'
                 }
             )
@@ -38,11 +38,11 @@ $settings = @{
         'CpuMode' = 'x64'
         'WebSiteName' = 'WebSite2'
         'WebBinding' = 'WebSite2.localhost'
-        'PhysicalPath' = 'C:\_CompanyName\Websites\WebSite2-UI'
+        'PhysicalPath' = "$env:HOMEDRIVE\_CompanyName\Websites\WebSite2-UI"
         'VirtualApplications' = @(
                 @{
                 'Name' = 'API'
-                'PhysicalPath' = 'C:\_CompanyName\Websites\WebSite2-API'
+                'PhysicalPath' = "$env:HOMEDRIVE\_CompanyName\Websites\WebSite2-API"
                 'AppPoolName' = 'WebSite2'
                 }
             )
@@ -53,10 +53,10 @@ $settings = @{
 
 function Check-Windows() {
 
-    $windows = [Environment]::OSVersion.Version -ge (New-Object 'Version' 6,1)
+    $windows = [Environment]::OSVersion.Version -ge (New-Object -TypeName 'Version' -ArgumentList 6,1)
 
     if($windows -eq $false) {
-        Write-Error "'Windows 7' required, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'Windows 7' required, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] Windows' -ForegroundColor Green
     }
@@ -64,15 +64,15 @@ function Check-Windows() {
 
 function Check-DotNetFramework() {
     
-    $dotNetInstalled = $(Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -recurse |
-        Get-ItemProperty -name Version -EA 0 |
+    $dotNetInstalled = $(Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -Recurse |
+        Get-ItemProperty -Name Version -ErrorAction SilentlyContinue |
         Where-Object { $_.PSChildName -match '^(?!S)\p{L}'} |
-        Select-Object PSChildName, Version |
-        Where-Object {$_.PSChildName -eq 'Full' -and $_.Version -ge (New-Object 'Version' 4,5)}) -ne
+        Select-Object -Property PSChildName, Version |
+        Where-Object {$_.PSChildName -eq 'Full' -and $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 4,5)}) -ne
         $null
 
     if($dotNetInstalled -eq $false) {
-        Write-Error "'.Net Framework 4.5' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'.Net Framework 4.5' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] .Net Framework' -ForegroundColor Green
     }
@@ -80,13 +80,13 @@ function Check-DotNetFramework() {
 
 function Check-IIS() {
 
-    $iisInstalled =  $(Get-ItemProperty HKLM:\SOFTWARE\Microsoft\InetStp\  | 
-        Select-Object setupstring, @{N='Version'; E={(New-Object 'Version' $_.MajorVersion,$_.MinorVersion)}} |
-        Where-Object { $_.Version -ge (New-Object 'Version' 7,5)}) -ne
+    $iisInstalled =  $(Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\InetStp\  | 
+        Select-Object -Property setupstring, @{N='Version'; E={(New-Object -TypeName 'Version' -ArgumentList $_.MajorVersion,$_.MinorVersion)}} |
+        Where-Object { $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 7,5)}) -ne
         $null
 
     if($iisInstalled -eq $false) {
-        Write-Error "'IIS 7.5' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'IIS 7.5' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] IIS' -ForegroundColor Green
     }
@@ -95,14 +95,14 @@ function Check-IIS() {
 function Check-SqlServer() {
 
     [reflection.assembly]::LoadWithPartialName('Microsoft.SqlServer.Smo') | Out-Null
-    $s = New-Object 'Microsoft.SqlServer.Management.Smo.Server'
+    $s = New-Object -TypeName 'Microsoft.SqlServer.Management.Smo.Server'
 
-    $sqlServerInstalled = $($s | Select-Object Version, EngineEdition |
-        Where-Object { $_.Version -ge (New-Object 'Version' 10,50) -and $_.EngineEdition -eq [Microsoft.SqlServer.Management.Smo.Edition]::EnterpriseOrDeveloper }) -ne
+    $sqlServerInstalled = $($s | Select-Object -Property Version, EngineEdition |
+        Where-Object { $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 10,50) -and $_.EngineEdition -eq [Microsoft.SqlServer.Management.Smo.Edition]::EnterpriseOrDeveloper }) -ne
         $null
 
     if($sqlServerInstalled -eq $false) {
-        Write-Error "'Sql Sever 2008 R2 (Developer edition)' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'Sql Sever 2008 R2 (Developer edition)' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] Sql Server' -ForegroundColor Green
     }
@@ -113,11 +113,11 @@ function Check-WebServicesExtensions() {
     #http://www.microsoft.com/en-us/download/details.aspx?id=23689
     $webServerExt = $(Get-WmiObject -Class win32_product | 
         Where-Object {$_.Vendor -ieq 'Microsoft Corporation'} | 
-        Where-Object {$_.Name -match 'Microsoft WSE 2.0 SP3' -and $_.Version -ge (New-Object 'Version' 2,0)}) -ne 
+        Where-Object {$_.Name -match 'Microsoft WSE 2.0 SP3' -and $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 2,0)}) -ne 
         $null
 
     if($webServerExt -eq $false) {
-        Write-Error "'Web Services Extensions 2.0 SP3' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'Web Services Extensions 2.0 SP3' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] Web Services Extensions' -ForegroundColor Green
     }
@@ -127,11 +127,11 @@ function Check-VisualJSharp() {
     #http://www.microsoft.com/en-us/download/details.aspx?id=15468
     $jSharp =  $(Get-WmiObject -Class win32_product | 
         Where-Object {$_.Vendor -ieq 'Microsoft Corporation'} | 
-        Where-Object {$_.Name -match 'Microsoft Visual J# 2.0' -and $_.Version -ge (New-Object 'Version' 2,0)}) -ne 
+        Where-Object {$_.Name -match 'Microsoft Visual J# 2.0' -and $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 2,0)}) -ne 
         $null
 
     if($jSharp -eq $false) {
-        Write-Error "'Visual J# 2.0' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'Visual J# 2.0' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] Visual J#' -ForegroundColor Green
     }
@@ -141,11 +141,11 @@ function Check-WebDeploy() {
     #http://www.microsoft.com/web/downloads/platform.aspx
     $webDeploy =  $(Get-WmiObject -Class win32_product | 
         Where-Object {$_.Vendor -ieq 'Microsoft Corporation'} | 
-        Where-Object {$_.Name -match 'Microsoft Web Deploy' -and $_.Version -ge (New-Object 'Version' 3,1237)}) -ne 
+        Where-Object {$_.Name -match 'Microsoft Web Deploy' -and $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 3,1237)}) -ne 
         $null
 
     if($webDeploy -eq $false) {
-        Write-Error "'WebDeploy 3.5' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'WebDeploy 3.5' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] WebDeploy' -ForegroundColor Green
     }
@@ -155,11 +155,11 @@ function Check-ReportViewer() {
     #http://www.microsoft.com/en-us/download/details.aspx?id=35747
     $reportViewer =  $(Get-WmiObject -Class win32_product | 
         Where-Object {$_.Vendor -ieq 'Microsoft Corporation'} | 
-        Where-Object {$_.Name -match 'Microsoft Report Viewer 2012 Runtime' -and $_.Version -ge (New-Object 'Version' 11,1)}) -ne 
+        Where-Object {$_.Name -match 'Microsoft Report Viewer 2012 Runtime' -and $_.Version -ge (New-Object -TypeName 'Version' -ArgumentList 11,1)}) -ne 
         $null
 
     if($reportViewer -eq $false) {
-        Write-Error "'Report Viewer 2012 Runtime' is not installed on your machine, unable to continue!" -ErrorAction Stop
+        Write-Error -Message "'Report Viewer 2012 Runtime' is not installed on your machine, unable to continue!" -ErrorAction Stop
     } else {
         Write-Host '[Pass] Report Viewer 2012' -ForegroundColor Green
     }
@@ -171,7 +171,7 @@ function New-IISAppPool() {
     (
         [Parameter(Mandatory=$true, Position = 0, ValueFromPipeline=$true)]
         [ValidateScript({
-            if (Test-Path "IIS:\AppPools\$_") { Throw New-Object -TypeName System.ArgumentException -ArgumentList "The IIS Application Pool '$_' already exists.", 'Name' }
+            if (Test-Path -Path "IIS:\AppPools\$_") { Throw New-Object -TypeName System.ArgumentException -ArgumentList "The IIS Application Pool '$_' already exists.", 'Name' }
             else { $true; }
         })]
         [string] $Name,
@@ -223,7 +223,7 @@ function New-IISAppPool() {
                 }
                 else
                 {
-                    $AppPoolCredential = New-Object System.Management.Automation.PSCredential $(Read-Host -Prompt 'Application Pool Identity Username'), $(Read-Host -Prompt 'Application Pool Identity Password' -AsSecureString)   
+                    $AppPoolCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $(Read-Host -Prompt 'Application Pool Identity Username'), $(Read-Host -Prompt 'Application Pool Identity Password' -AsSecureString)   
                 }
             }
 
@@ -233,51 +233,51 @@ function New-IISAppPool() {
             }
             else
             {
-                $AppPoolCredential = New-Object System.Management.Automation.PSCredential $Username, $(Read-Host -Prompt "Application Pool Identity Password for '$Username'" -AsSecureString)
+                $AppPoolCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username, $(Read-Host -Prompt "Application Pool Identity Password for '$Username'" -AsSecureString)
             }
         }
     }
 
-    Write-Verbose 'The following IIS Application Pool will be created:'
-    Write-Verbose "    Application Pool Name:                    $Name"
-    Write-Verbose "    Application Pool Managed Runtime Version: $ManagedRuntimeVersion"
-    Write-Verbose "    Application Pool CPU Mode:                $CpuMode"
-    Write-Verbose "    Application Pool Pipeline Mode:           $PipelineMode"
-    Write-Verbose "    Application Pool Identity Type:           $IdentityType"
+    Write-Verbose -Message 'The following IIS Application Pool will be created:'
+    Write-Verbose -Message "    Application Pool Name:                    $Name"
+    Write-Verbose -Message "    Application Pool Managed Runtime Version: $ManagedRuntimeVersion"
+    Write-Verbose -Message "    Application Pool CPU Mode:                $CpuMode"
+    Write-Verbose -Message "    Application Pool Pipeline Mode:           $PipelineMode"
+    Write-Verbose -Message "    Application Pool Identity Type:           $IdentityType"
     if ($IdentityType -imatch 'SpecificUser')
     {
-        Write-Verbose "    Application Pool Identity Username:       $Username"
+        Write-Verbose -Message "    Application Pool Identity Username:       $Username"
     }
 
-    New-WebAppPool $Name
+    New-WebAppPool -Name $Name
 
-    Set-ItemProperty "IIS:\AppPools\$Name" managedRuntimeVersion $ManagedRuntimeVersion
+    Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name managedRuntimeVersion -Value $ManagedRuntimeVersion
 
     if ($PipelineMode -imatch 'Classic')
     {
-        Set-ItemProperty "IIS:\AppPools\$Name" managedPipelineMode 1
+        Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name managedPipelineMode -Value 1
     }
     
     if ($CpuMode -imatch 'x86')
     {
-        Set-ItemProperty "IIS:\AppPools\$Name" enable32BitAppOnWin64 $true
+        Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name enable32BitAppOnWin64 -Value $true
     }
 
     switch ($IdentityType.ToLowerInvariant())
     {
-        'localsystem'    { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 0 }
-        'localservice'   { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 1 }
-        'networkservice' { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 2 }
+        'localsystem'    { Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.identityType -Value 0 }
+        'localservice'   { Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.identityType -Value 1 }
+        'networkservice' { Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.identityType -Value 2 }
         'specificuser'
         {
-            Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 3
-            Set-ItemProperty "IIS:\AppPools\$Name" processModel.userName $AppPoolCredential.UserName
-            Set-ItemProperty "IIS:\AppPools\$Name" processModel.password $(Get-Password -Password $AppPoolCredential.Password)
+            Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.identityType -Value 3
+            Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.userName -Value $AppPoolCredential.UserName
+            Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.password -Value $(Get-Password -Password $AppPoolCredential.Password)
         }
-        default          { Set-ItemProperty "IIS:\AppPools\$Name" processModel.identityType 4 }
+        default          { Set-ItemProperty -Path "IIS:\AppPools\$Name" -Name processModel.identityType -Value 4 }
     }
 
-    Write-Verbose "Application Pool '$Name' was successfully created."
+    Write-Verbose -Message "Application Pool '$Name' was successfully created."
 }
 
 function Setup-Websites() {
@@ -288,7 +288,7 @@ function Setup-Websites() {
         Write-Host "running '$key' setup..."
 
         # check AppPool settings
-        $appPool = Get-Item "IIS:\AppPools\$($node.AppPoolName)" -ErrorAction SilentlyContinue
+        $appPool = Get-Item -Path "IIS:\AppPools\$($node.AppPoolName)" -ErrorAction SilentlyContinue
         $createAppPool = $true;
 
         if($appPool -ne $null) {
@@ -297,7 +297,7 @@ function Setup-Websites() {
                                     ($appPool.enable32BitAppOnWin64 -eq ($node.CpuMode -eq 'x86'))
 
             if($validAppPoolSettings -eq $false) {
-                Remove-WebAppPool $node.AppPoolName
+                Remove-WebAppPool -Name $node.AppPoolName
             } else {
                 $createAppPool = $false;
             }
@@ -317,7 +317,7 @@ function Setup-Websites() {
                 New-WebBinding -Name $node.WebSiteName -Protocol 'http' -Port 80 -HostHeader $node.WebBinding -IPAddress '*'
             }
         } else {
-            if(-not(Test-Path $node.PhysicalPath)) {
+            if(-not(Test-Path -Path $node.PhysicalPath)) {
                 New-Item -ItemType Directory -Path $node.PhysicalPath | Out-Null
             }
             New-Website -Name $node.WebSiteName -ApplicationPool $node.AppPoolName -Port 80 -PhysicalPath $node.PhysicalPath -HostHeader $node.WebBinding -IPAddress '*' | Out-Null
@@ -330,7 +330,7 @@ function Setup-Websites() {
             $api = Get-WebApplication -Site $node.WebSiteName -Name $virtualAppConf.Name
 
             if($api -eq $null) {
-                if(-not(Test-Path $virtualAppConf.PhysicalPath)) {
+                if(-not(Test-Path -Path $virtualAppConf.PhysicalPath)) {
                     New-Item -ItemType Directory -Path $virtualAppConf.PhysicalPath | Out-Null
                 }
                 New-WebApplication -Site $node.WebSiteName -Name $virtualAppConf.Name -PhysicalPath $virtualAppConf.PhysicalPath -ApplicationPool $virtualAppConf.Name | Out-Null
@@ -346,7 +346,7 @@ function Setup-Websites() {
 
 
 Write-Host 'About to check required software for CompanyName main applications!'
-$userAggrement = Read-Host 'Operation may change your currect settings, do you want to proceed [Y]es/[N]o?'
+$userAggrement = Read-Host -Prompt 'Operation may change your current settings, do you want to proceed [Y]es/[N]o?'
 Write-Host "`r`n"
 
 if(-not($userAggrement -match 'y')) {

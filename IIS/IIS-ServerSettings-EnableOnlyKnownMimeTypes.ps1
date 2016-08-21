@@ -24,11 +24,11 @@ Clear-WebConfiguration -Filter $requestFilterPath
 # disallow unknown file extensions
 $fileExt = Get-WebConfiguration -Filter $requestFilterPath
     
-Write-Output "Setting to disallow unlisted file extensions on IIS"
+Write-Output -InputObject 'Setting to disallow unlisted file extensions on IIS'
     
 $fileExt.allowUnlisted = $false
 $fileExt.applyToWebDAV = $true
-$fileExt | Set-WebConfiguration $requestFilterPath
+$fileExt | Set-WebConfiguration -Filter $requestFilterPath
     
             
         

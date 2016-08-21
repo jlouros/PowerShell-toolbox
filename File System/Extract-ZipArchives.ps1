@@ -4,18 +4,18 @@
 # requires .Net Framework 4.5
 if(-not ($PSVersionTable.CLRVersion.Major -eq 4 -and $PSVersionTable.CLRVersion.Revision -gt 17000)) 
 {
-	Write-Error 'This script requires .Net Framework 4.5. Unable to proceed.' -ErrorAction Stop
+	Write-Error -Message 'This script requires .Net Framework 4.5. Unable to proceed.' -ErrorAction Stop
 }
 
-$zipFiles = Get-ChildItem . | Where-Object { $_.Name.EndsWith('.zip') }
+$zipFiles = Get-ChildItem -Path . | Where-Object { $_.Name.EndsWith('.zip') }
 
 foreach($zipFile in $zipFiles) 
 {
-    [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression.FileSystem') | Out-Null
+    Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
 
-    $extractLocation = Join-Path $zipFile.Directory 'unzipped'
+    $extractLocation = Join-Path -Path $zipFile.Directory -ChildPath 'unzipped'
 
-    Write-Output "Extracting '$($zipFile.Name)' to '$extractLocation'"
+    Write-Output -InputObject "Extracting '$($zipFile.Name)' to '$extractLocation'"
 
     [IO.Compression.ZipFile]::ExtractToDirectory($zipFile.FullName, $extractLocation)
 }
@@ -26,7 +26,7 @@ foreach($zipFile in $zipFiles)
 # PowerShell 5.0
 ####################
 
-Import-Module Microsoft.PowerShell.Archive
+Import-Module -Name Microsoft.PowerShell.Archive
 
 $srcFile = '.\myZipFile.zip'
 $destFolder = '.\ExtractedContents\'

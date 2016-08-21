@@ -1,22 +1,28 @@
 ﻿Function Set-MimeTypeIfNotPresent
 {
+  <#
+    .SYNOPSIS
+    Associates file extension with MIME type in IIS
+  #>
+
+
     param(
         [Parameter(Mandatory=$true)]
-        $fileExtension,
+        [string]$fileExtension,
         [Parameter(Mandatory=$true)]
-        $mimeType
+        [string]$mimeType
     )
 
-    $config = Get-WebConfiguration system.webServer/staticContent/mimeMap | Where-Object { $_.fileExtension -eq $fileExtension }
+    $config = Get-WebConfiguration -Filter system.webServer/staticContent/mimeMap | Where-Object { $_.fileExtension -eq $fileExtension }
 
     if($config -eq $null)
     {
-        Write-Output "'$fileExtension' file extension configuration not found. Adding with MIME type '$mimeType'"
-        Add-WebConfiguration system.webServer/staticContent -atIndex 0 -Value @{fileExtension=$fileExtension; mimeType=$mimeType}
+        Write-Output -InputObject "'$fileExtension' file extension configuration not found. Adding with MIME type '$mimeType'"
+        Add-WebConfiguration -Filter system.webServer/staticContent -AtIndex 0 -Value @{fileExtension=$fileExtension; mimeType=$mimeType}
     } 
     else 
     {
-        Write-Output "Configuration for '$fileExtension' found. No changes will be performed"
+        Write-Output -InputObject "Configuration for '$fileExtension' found. No changes will be performed"
     }
 }
 
@@ -24,12 +30,12 @@
 Import-Module -Name WebAdministration -ErrorAction Stop
 
 
-Set-MimeTypeIfNotPresent '.webm' 'video/webm'
-Set-MimeTypeIfNotPresent '.ogg' 'video/ogg'
-Set-MimeTypeIfNotPresent '.mov' 'video/quicktime'
-Set-MimeTypeIfNotPresent '.mp4' 'video/mp4'
-Set-MimeTypeIfNotPresent '.svg' 'image/svg+xml'
-Set-MimeTypeIfNotPresent '.woff' 'font/x-woff'
-Set-MimeTypeIfNotPresent '.otf' 'font/otf'
-Set-MimeTypeIfNotPresent '.eot' 'application/vnd.ms-fontobject'
-Set-MimeTypeIfNotPresent '.ttf' 'application/octet-stream'
+Set-MimeTypeIfNotPresent -fileExtension '.webm' -mimeType 'video/webm'
+Set-MimeTypeIfNotPresent -fileExtension '.ogg' -mimeType 'video/ogg'
+Set-MimeTypeIfNotPresent -fileExtension '.mov' -mimeType 'video/quicktime'
+Set-MimeTypeIfNotPresent -fileExtension '.mp4' -mimeType 'video/mp4'
+Set-MimeTypeIfNotPresent -fileExtension '.svg' -mimeType 'image/svg+xml'
+Set-MimeTypeIfNotPresent -fileExtension '.woff' -mimeType 'font/x-woff'
+Set-MimeTypeIfNotPresent -fileExtension '.otf' -mimeType 'font/otf'
+Set-MimeTypeIfNotPresent -fileExtension '.eot' -mimeType 'application/vnd.ms-fontobject'
+Set-MimeTypeIfNotPresent -fileExtension '.ttf' -mimeType 'application/octet-stream'
